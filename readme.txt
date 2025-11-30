@@ -12,3 +12,15 @@ why use DTOS?
 #api-request folder :
 here we will be creating different sub-folders for testing the different endpoints of a service....
 -> eg. patient-service : here we will list all the api-endpoints, provided by patient-service microservice
+
+
+### just curious how error is handled in spring boot
+
+1️⃣ Exception is thrown inside Service
+2️⃣ It travels up (bubbles) to Controller
+3️⃣ Controller does not catch it(because there is not try-catch block)
+4️⃣ Spring Framework catches it in internal layer (DispatcherServlet)
+5️⃣ It tries to resolve exception using configured resolvers
+6️⃣ It sees @ControllerAdvice handlers available
+7️⃣ Finds method matching the exception type
+8️⃣ Calls your handler to convert it → JSON Response
