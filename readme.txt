@@ -9,3 +9,6 @@ why use DTOS?
 -> Request DTOs allow you to validate client inpuot (eg. checking if fields are null or meet certain criteria)
 
 
+#api-request folder :
+here we will be creating different sub-folders for testing the different endpoints of a service....
+-> eg. patient-service : here we will list all the api-endpoints, provided by patient-service microservice
