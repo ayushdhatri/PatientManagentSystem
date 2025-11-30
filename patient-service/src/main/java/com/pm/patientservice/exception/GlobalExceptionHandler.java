@@ -1,6 +1,7 @@
 package com.pm.patientservice.exception;
 
 
+import com.pm.patientservice.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,7 +24,6 @@ public class GlobalExceptionHandler {
 
          return ResponseEntity.badRequest().body(errors);
      }
-
      @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex){
 
@@ -31,9 +31,22 @@ public class GlobalExceptionHandler {
          Map<String, String> errors = new HashMap<>();
          errors.put("message", "Email already Exist!");
          return ResponseEntity.badRequest().body(errors);
+    }
 
+    @ExceptionHandler(PatientNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handlePatientNotFoundException(PatientNotFoundException ex){
 
-     }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Message : ", "Patient not found !");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(DOBCannotBeUpdated.class)
+    public ResponseEntity<Map<String, String>> handleDOBCannotBeUpdated(DOBCannotBeUpdated ex){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Message : ", "Update Action on DOB not allowed");
+        return ResponseEntity.badRequest().body(errors);
+    }
 
 
 
