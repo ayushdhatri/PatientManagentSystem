@@ -24,3 +24,15 @@ here we will be creating different sub-folders for testing the different endpoin
 6️⃣ It sees @ControllerAdvice handlers available
 7️⃣ Finds method matching the exception type
 8️⃣ Calls your handler to convert it → JSON Response
+
+
+@Validation : It checks for each field and if its blank it will throw proper message and response with error code 400
+
+Whenever we want that based on request type in controller, like get, put, post, patch, we want to validate the fields with incoming request
+then in that case we can use the validators
+
+When you use @Validated(Default.class) we simply means that Default.class only(which includes @NotBlank, @NotNULL...etc)
+When you use @Validated(Default.class, CreatePatientValidation.class) it means validated it for both default class and alos for CreatePatientValidation.class)
+
+So basically you have to assign groups to each field, and then use in the controller for grouping simple.
+Note : you also need to remove the validation from both the getter setter of that variable
