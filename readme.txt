@@ -6,7 +6,7 @@ why use DTOS?
 
 -> Allow you to send or receive only the fields relevant to the client, rather than exposing all field in your domain model.
 
--> Request DTOs allow you to validate client inpuot (eg. checking if fields are null or meet certain criteria)
+-> Request DTOs allow you to validate client input (eg. checking if fields are null or meet certain criteria)
 
 
 #api-request folder :
