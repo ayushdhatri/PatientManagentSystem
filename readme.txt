@@ -36,3 +36,11 @@ When you use @Validated(Default.class, CreatePatientValidation.class) it means v
 
 So basically you have to assign groups to each field, and then use in the controller for grouping simple.
 Note : you also need to remove the validation from both the getter setter of that variable
+
+
+
+Adding Swagger : (bit complext to add but just add dependecy proper veresion which matches the compatibilty with spring boot)
+Once Added and build successfully you need to visit the URL : http:://localhost:4000/v3/api-docs
+// make hit to url copy the whole json
+// open the swigger editor
+//
