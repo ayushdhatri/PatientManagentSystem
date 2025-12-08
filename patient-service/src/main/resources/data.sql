@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS patient
     date_of_birth   DATE                NOT NULL,
     registered_date DATE                NOT NULL
 );
-
 -- Insert well-known UUIDs for specific patients
 INSERT INTO patient (id, name, email, address, date_of_birth, registered_date)
 SELECT '123e4567-e89b-12d3-a456-426614174000',
@@ -155,3 +154,4 @@ SELECT '223e4567-e89b-12d3-a456-426614174014',
        '1987-10-17',
        '2024-03-29'
 WHERE NOT EXISTS (SELECT 1 FROM patient WHERE id = '223e4567-e89b-12d3-a456-426614174014');
+
