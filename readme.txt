@@ -227,3 +227,237 @@ If you want, I can also explain:
 🔹 How to reduce image size further (e.g., JRE instead of JDK)
 🔹 How to add environment variables (DB credentials)
 🔹 Docker Compose to run backend + Postgres together
+
+
+# gRPC :
+gRPC Internal Working — Full Deep Dive
+Below is the exact flow for a Unary RPC Call, from client function call → server function execution → response.
+
+🔷 0️⃣ Before any request — Setup (One time)
+A. Developer defines API in .proto
+Compiler (protoc) generates code:
+
+Client Stub: Looks like a local function call
+
+Server Skeleton: Dispatches to real implementation
+
+B. TCP + HTTP/2 connection established
+ALPN negotiation (TLS handshake if secure)
+
+One connection can handle many parallel RPCs (HTTP/2 streams)
+
+▶️ 1️⃣ Client Calls a gRPC Method
+User calls like normal code:
+
+java
+Copy code
+UserResponse res = stub.getUser(UserRequest.newBuilder().setId(10).build());
+Internally:
+
+Stub encodes the request message object → Protocol Buffers (binary)
+
+Assigns a Stream ID (HTTP/2 feature)
+
+Creates metadata (headers) including:
+
+:method = POST
+
+content-type = application/grpc+proto
+
+te = trailers
+
+grpc-timeout, etc.
+
+All headers compressed via HPACK (HTTP/2 header compression).
+
+🔶 2️⃣ Serialization — Data Conversion
+How Protobuf serialization works in detail:
+Message fields get converted into:
+
+Component	Meaning
+Field Number	Identifies the field (defined in .proto)
+Wire Type	Specifies encoding (varint, fixed32, string, etc.)
+Value	Binary encoded data
+
+Format:
+
+ini
+Copy code
+Key = (field_number << 3) | wire_type
+Value = encoded field value
+Example:
+
+proto
+Copy code
+message UserRequest {
+  int32 id = 1;
+}
+Becomes (binary):
+
+Copy code
+08 0A
+08 = Key for field 1 (varint)
+0A = value (decimal 10 encoded)
+
+✔ Tiny payload
+✔ Very fast encode/decode
+✔ Schema makes structure known on both sides
+
+📦 3️⃣ Message Framing (gRPC-specific)
+Each message wrapped in a gRPC Data Frame:
+
+Byte	Meaning
+1 byte	Compression flag
+4 bytes (uint32)	Message length
+N bytes	Protobuf serialized message
+
+Example:
+
+Copy code
+0x00 00 00 00 02 08 0A
+Now ready for network transfer.
+
+🌐 4️⃣ HTTP/2 Transmission
+Data written into the TCP socket:
+
+Multiplexed streams → no blocking
+
+Flow control window ensures optimal packet flow
+
+Server receives:
+
+Parses HTTP/2 headers
+
+Passes data frames to gRPC library
+
+🏢 5️⃣ Server Decoding + Dispatch
+Flow inside the server:
+
+HTTP/2 layer extracts message bytes
+
+gRPC runtime removes framing
+
+Protobuf deserializer reconstructs objects
+
+Routed to correct service using:
+
+Method name from header: "/UserService/GetUser"
+
+Stream ID mapping
+
+Finally calls your function:
+
+java
+Copy code
+public UserResponse getUser(UserRequest req) {
+    // business logic
+}
+✔ From binary → actual argument object
+✔ Type-safe call using generated code
+
+🧮 6️⃣ Server Response
+Server performs reverse path:
+
+Step	What happens
+Business logic	Executes and creates response object
+Serialize	Convert object → Protobuf binary
+gRPC framing	Add compression flag + length
+HTTP/2	Send over same Stream ID
+TCP	Over network to client
+
+Server sends trailers after data:
+
+Final status → grpc-status: 0 (OK)
+
+Optional grpc-message for errors
+
+🔁 7️⃣ Client Decoding & Returning Result
+Client:
+
+Reads frames for that Stream ID
+
+Remove gRPC framing
+
+Deserialize Protobuf → Original object
+
+Stub returns it like a local function return
+
+java
+Copy code
+return deserializedUserResponse;
+✔ No parsing JSON
+✔ No reflection-based dynamic fields
+✔ No multi-call overhead
+
+🥇 Why This Whole Flow is Fast
+Optimization	Benefit
+Binary serialization (protobuf)	Minimal CPU + network cost
+Predefined schemas	No runtime field discovery
+HTTP/2 multiplexing	Avoid connection creation per request
+HPACK compression	Smaller metadata → lower latency
+Single TCP connection	Faster round-trips
+Streaming support	No polling + real-time efficiency
+
+Latency can improve 5×–10× vs REST JSON
+Bandwidth usage can drop by 50%–90%
+
+🔄 Visual Summary
+pgsql
+Copy code
+Client Stub
+   ↓ (Protobuf serialization)
+gRPC Framing
+   ↓
+HTTP/2 Stream
+   ↓ (TCP packets)
+Server HTTP/2
+   ↓
+gRPC Runtime
+   ↓ (Protobuf deserialization)
+Server Handler (Function invoked)
+   ↓ (Response generated)
+Reverse path back to Client
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
