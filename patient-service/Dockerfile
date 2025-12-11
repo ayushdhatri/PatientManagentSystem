@@ -12,7 +12,6 @@ RUN mvn clean package
 
 FROM eclipse-temurin:21-jdk AS runner
 
-
 WORKDIR /app
 
 COPY --from=builder ./app/target/patient-service-0.0.1-SNAPSHOT.jar ./app.jar
