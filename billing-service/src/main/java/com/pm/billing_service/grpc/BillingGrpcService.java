@@ -28,5 +28,20 @@ public class BillingGrpcService extends BillingServiceImplBase {
         responseObserver.onNext(response);// similarly we can send multiple response
         responseObserver.onCompleted();
     }
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
