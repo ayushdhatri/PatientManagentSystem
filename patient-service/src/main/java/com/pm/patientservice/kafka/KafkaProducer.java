@@ -24,11 +24,21 @@ public class KafkaProducer {
                 .setEmail(patient.getEmail())
                 .setEventType("PATIENT_CREATED")
                 .build();
-        try{
-        kafkaTemplate.send("patient", event.toByteArray());
-        }
-        catch(Exception ex){
-            log.error("Error sending PatienteCreated event : {}", event);
-        }
+
+        kafkaTemplate.send(
+                "patient",
+                patient.getId().toString(),   // IMPORTANT: key
+                event.toByteArray()
+        ).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("❌ Kafka send failed for patientId={}", patient.getId(), ex);
+            } else {
+                log.info("✅ Kafka message SENT → topic={}, partition={}, offset={}",
+                        result.getRecordMetadata().topic(),
+                        result.getRecordMetadata().partition(),
+                        result.getRecordMetadata().offset());
+            }
+        });
     }
+
 }
