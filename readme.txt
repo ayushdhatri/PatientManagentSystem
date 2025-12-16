@@ -420,6 +420,15 @@ Reverse path back to Client
 
 
 
+##when you should use kafka and when you should use grpc##########
+
+-> gRPC : 1-1 microservice communication. when you need to an immediate response (synchronous)
+
+-> Kafka : 1 : m (1 to many) microservice communication , do not need an immediate response (asynchronous)
+
+
+
+
 
 
 
