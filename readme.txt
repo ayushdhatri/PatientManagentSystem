@@ -426,7 +426,7 @@ Reverse path back to Client
 
 -> Kafka : 1 : m (1 to many) microservice communication , do not need an immediate response (asynchronous)
 
-
+#### Introduce Authentication and Authorization ###########
 
 
 
